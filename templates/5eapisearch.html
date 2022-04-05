@@ -1,0 +1,71 @@
+<head>
+  <script src="https://rawgit.com/farzher/fuzzysort/master/fuzzysort.js" defer></script>
+  <script defer>
+    const urls = JSON.parse({{ urls|tojson|safe }})
+    let stage = null;
+    let input = null;
+    let search_results = null
+
+    function init() {
+      stage = document.getElementById("stage")
+      input = document.getElementById("search_input")
+      search_results = document.getElementById("search_results")
+    }
+
+    function selectme(key) {
+      input.value = key;
+      do_search()
+    }
+
+    function dump(results) {
+      search_results.innerHTML = "";
+      Object.keys(results).map(function(key) {
+        let li = document.createElement("li");
+        li.onclick = function() { selectme(key) };
+        li.append(document.createTextNode(key));
+        search_results.append(li);
+      });
+    }
+    function do_search() {
+      const results = fuzzysort.go(input.value, Object.keys(urls));
+      let matches = {};
+      for (let r of results) {
+        matches[r.target] = urls[r.target]
+      }
+      dump(matches)
+    }
+    render_funcs = {
+      'ability-scores': dump,
+       'alignments': dump,
+       'backgrounds': dump,
+       'classes': dump,
+       'conditions': dump,
+       'damage-types': dump,
+       'equipment': dump,
+       'equipment-categories': dump,
+       'feats': dump,
+       'features': dump,
+       'languages': dump,
+       'magic-items': dump,
+       'magic-schools': dump,
+       'monsters': dump,
+       'proficiencies': dump,
+       'races': dump,
+       'rule-sections': dump,
+       'rules': dump,
+       'skills': dump,
+       'spells': dump,
+       'subclasses': dump,
+       'subraces': dump,
+       'traits': dump,
+       'weapon-properties': dump,
+    }
+  </script>
+</head>
+<body onload="init()">
+  <input id="search_input" type="text" oninput="do_search()">
+  <ul id="search_results"></ul>
+  <div id="stage"></div>
+
+</body>
+

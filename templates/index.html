@@ -1,0 +1,14 @@
+{% if error %} {{ error }} <br>{% endif %}
+<form action="/game" method="POST">
+  <label for="name">Character Name</label><br>
+  <input type="text" id="name" name="name" value=""><br><br>
+  <label for="gameId">Game ID</label><br>
+  <input type="text" id="gameId" name="gameId" value=""><br><br>
+  <input type="submit" value="Submit">
+</form>
+
+<form action="/new-game" method="POST">
+  <label for="gameId">gameId</label><br>
+  <input type="text" id="gameId" name="gameId" value=""><br><br>
+  <input type="submit" value="Submit">
+</form>

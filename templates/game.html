@@ -1,0 +1,34 @@
+<head>
+  <script>
+    const evtSource = new EventSource("/game-info/{{game.gameId}}")
+    evtSource.onmessage = function(event) {
+      update(event.data)
+    }
+  function update(text) {
+    json = JSON.parse(text);
+    let ul = document.getElementById('playerlist');
+    ul.innerHTML = '';
+    for (character of json.players) {
+      let li = document.createElement("li");
+      li.appendChild(document.createTextNode(character));
+      ul.appendChild(li);
+    }
+  }
+
+  </script>
+</head>
+
+Game Id: {{ game.gameId }} 
+
+<form action="/leave/{{game.gameId}}" method="POST">
+  <input type="submit" value="Leave Game">
+</form>
+
+<br>
+
+Player:
+<ul id='playerlist'>
+  {% for player in game.players %}
+  <li>{{player}}</li>
+  {% endfor %}
+</ul>
