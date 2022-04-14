@@ -1,5 +1,6 @@
 <head>
   <script src="https://rawgit.com/farzher/fuzzysort/master/fuzzysort.js" defer></script>
+  <script src="/static/utils.js" defer></script>
   <script defer>
     const urls = JSON.parse({{ urls|tojson|safe }})
     let stage = null;
@@ -14,7 +15,15 @@
 
     function selectme(key) {
       input.value = key;
-      do_search()
+      do_search();
+
+      url = urls[key].url;
+      Get(url, (text) => {
+        let json = JSON.parse(text);
+        // stage.innerHTML = "<h3>" + key + "</h3>";
+        // stage.innerHTML += "<p>" + json.desc.join("</p><p>") + "</p>"
+        stage.innerHTML += "<pre>" + JSONFormat(text) + "</pre>"   
+      });
     }
 
     function dump(results) {
@@ -26,7 +35,9 @@
         search_results.append(li);
       });
     }
+
     function do_search() {
+      stage.innerHTML = "";
       const results = fuzzysort.go(input.value, Object.keys(urls));
       let matches = {};
       for (let r of results) {
@@ -34,6 +45,7 @@
       }
       dump(matches)
     }
+
     render_funcs = {
       'ability-scores': dump,
        'alignments': dump,
@@ -64,8 +76,7 @@
 </head>
 <body onload="init()">
   <input id="search_input" type="text" oninput="do_search()">
-  <ul id="search_results"></ul>
   <div id="stage"></div>
-
+  <ul id="search_results"></ul>
 </body>
 

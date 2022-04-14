@@ -36,7 +36,6 @@ def enumerate_api():
 
 @functools.lru_cache(maxsize=None)
 def search(category, spec):
-    print("querying api for ", category, spec)
     url = '/'.join((BASE, "api", category, spec))
     req = requests.get(url)
     if req.status_code == 200:
