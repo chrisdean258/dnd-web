@@ -1,77 +1,109 @@
 <head>
   <script src="https://rawgit.com/farzher/fuzzysort/master/fuzzysort.js" defer></script>
   <script src="/static/utils.js" defer></script>
+  <script src="/static/render.js" defer></script>
   <script defer>
     const urls = JSON.parse({{ urls|tojson|safe }})
+    const search_back = 0;
+    let searches = [];
     let stage = null;
     let input = null;
-    let search_results = null
+    let search_results = null;
+    let render_funcs = null;
+
+    // not yet working
+    window.addEventListener('popstate', function(event) {
+      search_back += 1;
+      const idx = searches.length - 1 - search_back;
+      if (idx >= 0) {
+        history.pushState(null, null, window.location.pathname);
+        e.preventDefault();
+        selectme(searches[idx]);
+      } else {
+        history.back();
+      }
+      history.pushState(null, null, window.location.pathname);
+    });
 
     function init() {
       stage = document.getElementById("stage")
       input = document.getElementById("search_input")
       search_results = document.getElementById("search_results")
+      render_funcs = {
+        'ability-scores': render_ability_scores,
+        'alignments': render_alignment,
+        'backgrounds': render_backgrounds,
+        'classes': render_classes,
+        'conditions': render_conditions,
+        'damage-types': render_damage_types,
+        'equipment': render_equipment,
+        'equipment-categories': render_equipment_categories,
+        'feats': render_feats,
+        'features': render_features,
+        'languages': render_languages,
+        'magic-items': render_magic_items,
+        'magic-schools': render_magic_schools,
+        'monsters': render_monsters,
+        'proficiencies': null, // This is intentional as we should never render proficiencies, only skills
+        'races': render_races,
+        'rule-sections': render_rule_sections,
+        'rules': render_rules,
+        'skills': render_skills,
+        'spells': render_spells,
+        'subclasses': render_subclasses,
+        'subraces': render_subraces,
+        'traits': render_traits,
+        'weapon-properties': render_weapon_properties,
+      }
     }
 
     function selectme(key) {
       input.value = key;
+      if (search_back > 0) {
+        searches = searches.slice(0, -search_back);
+        search_back = 0;
+      }
+      searches.push(input.value);
       do_search();
+      display(key);
+    }
 
-      url = urls[key].url;
+    function display(key) {
+      if (key.startsWith("Skill: ")) {
+        return display(key.substring(7));
+      }
+      const item = urls[key]
+      const url = item.url;
+      const category = item.category;
+      const renderer = render_funcs[category];
       Get(url, (text) => {
-        let json = JSON.parse(text);
-        // stage.innerHTML = "<h3>" + key + "</h3>";
-        // stage.innerHTML += "<p>" + json.desc.join("</p><p>") + "</p>"
-        stage.innerHTML += "<pre>" + JSONFormat(text) + "</pre>"   
+        const json = JSON.parse(text);
+        rv = renderer(json);
+        stage.innerHTML = "";
+        stage.append(rv);
       });
     }
 
-    function dump(results) {
+    function display_matches(results) {
       search_results.innerHTML = "";
       Object.keys(results).map(function(key) {
-        let li = document.createElement("li");
-        li.onclick = function() { selectme(key) };
-        li.append(document.createTextNode(key));
-        search_results.append(li);
+        let li = element("li", key, search_results);
+        li.onclick = function() {
+        selectme(key) };
       });
     }
 
     function do_search() {
       stage.innerHTML = "";
-      const results = fuzzysort.go(input.value, Object.keys(urls));
+      const value = input.value;
+      const results = fuzzysort.go(value, Object.keys(urls));
       let matches = {};
       for (let r of results) {
         matches[r.target] = urls[r.target]
       }
-      dump(matches)
+      display_matches(matches)
     }
 
-    render_funcs = {
-      'ability-scores': dump,
-       'alignments': dump,
-       'backgrounds': dump,
-       'classes': dump,
-       'conditions': dump,
-       'damage-types': dump,
-       'equipment': dump,
-       'equipment-categories': dump,
-       'feats': dump,
-       'features': dump,
-       'languages': dump,
-       'magic-items': dump,
-       'magic-schools': dump,
-       'monsters': dump,
-       'proficiencies': dump,
-       'races': dump,
-       'rule-sections': dump,
-       'rules': dump,
-       'skills': dump,
-       'spells': dump,
-       'subclasses': dump,
-       'subraces': dump,
-       'traits': dump,
-       'weapon-properties': dump,
-    }
   </script>
 </head>
 <body onload="init()">
