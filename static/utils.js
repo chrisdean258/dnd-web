@@ -21,6 +21,17 @@ function JSONFormat(str) {
 	return JSON.stringify(json, null, 4);
 }
 
+function render_md_line(text, _parent) {
+	let parts = text.split("**");
+	for(let i in parts) {
+		if (i % 2 == 0) {
+			_parent.append(document.createTextNode(parts[i]));
+		} else {
+			element("b", parts[i], _parent);
+		}
+	}
+}
+
 function element(type, text, _parent) {
 	const elem = document.createElement(type);
 	if (text) {
@@ -44,7 +55,8 @@ function parajoin(arr, _parent) {
 	if (typeof(arr) == "string") return element("p", arr, _parent)
 	const div = element("div", null, _parent)
 	for(let para of arr) {
-		element("p", para, div);
+		let p = element("p", "", div);
+		render_md_line(para, p);
 	}
 	if(_parent) _parent.append(div)
 	return div
