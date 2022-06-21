@@ -9,18 +9,18 @@ function render_ability_scores(json) {
 	element("h4", "Skills", div);
 	let ul = element("ul", null, div);
 	for(let skill of json.skills) {
-		const li = clickable("li", "", skill.name, ul);
+		const li = clickable("li", "", "", "skills", skill.name, ul);
 	}
 	return div;
 }
 
-function clicklist(label, items, _parent) {
+function clicklist(label, category, items, _parent) {
 	const div = element("div", "", _parent);
 	if (items.length == 0) return div;
 	if (label) element("h4", label, div);
 	let ul = element("ul", null, div);
 	for(let item of items) {
-		clickable("li", "", item, ul)
+		clickable("li", "", category, item, ul)
 	}
 	return div
 }
@@ -43,8 +43,8 @@ function render_classes(json) { return dump(json); };
 function render_equipment(json) {
 	const div = element("div");
 	element("h3", json.name, div);
-	clickable("h5", "Equipment Category: ", json.equipment_category.name, div);
-	clickable("h5", "Gear Category: ", json.gear_category.name, div);
+	clickable("h5", "Equipment Category: ", "equipment-categories", json.equipment_category.name, div);
+	clickable("h5", "Gear Category: ", "equipment", json.gear_category.name, div);
 	element("h4", "Cost: " + json.cost.quantity + " " + json.cost.unit, div);
 	element("h4", "Weight: " + json.weight + " lbs", div);
 	parajoin(json.desc, div)
@@ -63,7 +63,7 @@ function render_equipment(json) {
 function render_equipment_categories(json) {
 	const div = element("div");
 	element("h3", json.name, div);
-	clicklist(null, json.equipment.map((i) => i.name), div);
+	clicklist(null, "equipment", json.equipment.map((i) => i.name), div);
 	return div;
 }
 
@@ -75,7 +75,7 @@ function render_prerequisites(prereqs, _parent) {
 	for(let prereq of json.prerequisites) {
 		if (prereq.ability_score) {
 			const li = element("li", "Minimum " + prereq.ability_score.name + " score of " + prereq.minimum_score, ul);
-			li.onclick = () => selectme(prereq.ability_score.name);
+			li.onclick = () => selectme("ability-scores", prereq.ability_score.name);
 		} else {
 			const eh = dump(prereq);
 			const li = element("li", null, ul);
@@ -89,24 +89,26 @@ function render_feats(json) {
 	element("h3", json.name, div);
 	parajoin(json.desc, div);
 	render_prerequisites(json.prerequisites, div);
-	clickable("h4", "Class: ", json.class.name, ul);
+	clickable("h4", "Class: ", "classes", json.class.name, ul);
 	return div;
 }
 
 function render_features(json) {
 	const div = element("div");
 	element("h3", json.name, div);
-	clickable("h4", "Class: ", json.class.name, div);
+	clickable("h4", "Class: ", "classes", json.class.name, div);
 	element("h4", "Level: " + json.level, div);
 	render_prerequisites(json.prerequisites, div);
 	parajoin(json.desc, div);
 	return div;
-} function render_languages(json) {
+}
+
+function render_languages(json) {
 	const div = element("div");
 	element("h3", json.name, div);
 	parajoin(json.desc, div);
 	element("h5", "Type: " + json.type, div);
-	clicklist("Typical Speakers", json.typical_speakers, div);
+	clicklist("Typical Speakers", "languages", json.typical_speakers, div);
 	return div;
 }
 function render_magic_items(json) {
@@ -134,7 +136,7 @@ function render_races(json) { return dump(json); }
 function render_rules(json) {
 	const div = element("div")
 	element("h3", json.name, div);
-	clicklist("Sections:", json.subsections.map((i) => i.name), div);
+	clicklist("Sections:", "rule-sections", json.subsections.map((i) => i.name), div);
 	return div;
 }
 
@@ -149,7 +151,7 @@ function render_skills(json) {
 	const div = element("div")
 	element("h3", json.name, div);
 	parajoin(json.desc, div)
-	clickable("h4", "Ability Score: ", json.ability_score.name, div)
+	clickable("h4", "Ability Score: ", "ability-scores", json.ability_score.name, div)
 	return div;
 }
 
@@ -171,7 +173,7 @@ function render_spells(json) {
 	element("h5", "Duration: " + json.duration, div);
 	parajoin(json.desc, div);
 	if (json.higher_level) parajoin(json.higher_level, div);
-	clicklist("Classes:", json.classes.map((i) => i.name), div);
+	clicklist("Classes:", "classes", json.classes.map((i) => i.name), div);
 	return div
 }
 function render_subclasses(json) { return dump(json); }
@@ -181,8 +183,8 @@ function render_traits(json) {
 	const div = element("div")
 	element("h3", json.name, div);
 	parajoin(json.desc, div)
-	clicklist("Races:", json.races.map((i) => i.name), div);
-	clicklist("Subraces:", json.subraces, div);
-	clicklist("Proficiencies:", json.proficiencies, div);
+	clicklist("Races:", "races", json.races.map((i) => i.name), div);
+	clicklist("Subraces:", "subraces", json.subraces, div);
+	clicklist("Proficiencies:", "proficiencies", json.proficiencies, div);
 	return div
 }

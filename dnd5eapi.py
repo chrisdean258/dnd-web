@@ -23,9 +23,10 @@ def enumerate_api():
 
     categories = requests.get(BASE + "/api/").json()
     for k, v in categories.items():
+        CACHE[k] = {}
         req = requests.get(BASE + v).json()
         for item in req.get("results", []):
-            CACHE[item["name"]] = {
+            CACHE[k][item["name"]] = {
                 "url": item["url"],
                 "category": k
             }

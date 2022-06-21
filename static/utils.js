@@ -44,9 +44,9 @@ function element(type, text, _parent) {
 	return elem;
 }
 
-function clickable(type, label, value, _parent) {
+function clickable(type, label, category, value, _parent) {
 	const rv = element(type, label + value, _parent);
-	rv.onclick = () => selectme(value);
+	rv.onclick = () => selectme(category, value);
 	return rv;
 }
 

@@ -10,6 +10,7 @@
     let input = null;
     let search_results = null;
     let render_funcs = null;
+    let category_pretty_names = null;
 
     // not yet working
     window.addEventListener('popstate', function(event) {
@@ -55,9 +56,35 @@
         'traits': render_traits,
         'weapon-properties': render_weapon_properties,
       }
+      category_pretty_names = {
+        'ability-scores': 'Ability Scores',
+        'alignments': 'Alignments',
+        'backgrounds': 'Backgrounds',
+        'classes': 'Classes',
+        'conditions': 'Conditions',
+        'damage-types': 'Damage Types',
+        'equipment': 'Equipment',
+        'equipment-categories': 'Equipment Categories',
+        'feats': 'Feats',
+        'features': 'Features',
+        'languages': 'Languages',
+        'magic-items': 'Magic Items',
+        'magic-schools': 'Magic Schools',
+        'monsters': 'Monsters',
+        'proficiencies': 'Proficiencies',
+        'races': 'Races',
+        'rule-sections': 'Rule Sections',
+        'rules': 'Rules',
+        'skills': 'Skills',
+        'spells': 'Spells',
+        'subclasses': 'Subclasses',
+        'subraces': 'Subraces',
+        'traits': 'Traits',
+        'weapon-properties': 'Weapon Properties',
+      }
     }
 
-    function selectme(key) {
+    function selectme(category, key) {
       input.value = key;
       if (search_back > 0) {
         searches = searches.slice(0, -search_back);
@@ -65,16 +92,15 @@
       }
       searches.push(input.value);
       do_search();
-      display(key);
+      display(category, key);
     }
 
-    function display(key) {
+    function display(category, key) {
       if (key.startsWith("Skill: ")) {
         return display(key.substring(7));
       }
-      const item = urls[key]
+      const item = urls[category][key]
       const url = item.url;
-      const category = item.category;
       const renderer = render_funcs[category];
       Get(url, (text) => {
         const json = JSON.parse(text);
@@ -86,22 +112,27 @@
 
     function display_matches(results) {
       search_results.innerHTML = "";
-      Object.keys(results).map(function(key) {
-        let li = element("li", key, search_results);
-        li.onclick = function() {
-        selectme(key) };
+      Object.keys(results).map(function(category) {
+        if (results[category].length == 0) return;
+        element("h4", category_pretty_names[category], search_results);
+        let ul = element("ul", null, search_results);
+        for (let res of results[category]) {
+          let li = element("li", res.target, ul);
+          li.onclick = function() {
+            selectme(category, res.target);
+          };
+        }
       });
     }
 
     function do_search() {
       stage.innerHTML = "";
       const value = input.value;
-      const results = fuzzysort.go(value, Object.keys(urls));
-      let matches = {};
-      for (let r of results) {
-        matches[r.target] = urls[r.target]
+      let results = {};
+      for (let key of Object.keys(urls)) {
+        results[key] = fuzzysort.go(value, Object.keys(urls[key]))
       }
-      display_matches(matches)
+      display_matches(results)
     }
 
   </script>
